@@ -4,10 +4,9 @@ const fs = require('fs');
 
 const app = express();
 app.use(express.json());
-app.use(express.static('public'));
+app.use(express.static(__dirname));
 
-// Stockage JSON simple (pas de SQLite, compatible partout)
-const DATA_FILE = process.env.DATA_FILE || '/tmp/suivi_st_data.json';
+const DATA_FILE = '/tmp/suivi_st_data.json';
 
 function readData() {
   try {
@@ -26,7 +25,6 @@ function uid() {
   return Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
 }
 
-// ── CHANTIERS ──────────────────────────────────────────────
 app.get('/api/chantiers', (req, res) => {
   const data = readData();
   res.json(data.chantiers.sort((a,b) => b.created_at > a.created_at ? 1 : -1));
@@ -62,7 +60,6 @@ app.patch('/api/chantiers/:id/gestion', (req, res) => {
   res.json({ ok: true });
 });
 
-// ── FICHES ST ──────────────────────────────────────────────
 app.get('/api/chantiers/:id/fiches', (req, res) => {
   const data = readData();
   const fiches = data.fiches.filter(f => f.chantier_id === req.params.id);
@@ -115,7 +112,6 @@ app.patch('/api/fiches/:id/fdcm1', (req, res) => {
   res.json({ ok: true });
 });
 
-// ── BUDGET ─────────────────────────────────────────────────
 app.post('/api/fiches/:id/budget', (req, res) => {
   const data = readData();
   const count = data.budget.filter(r => r.fiche_id === req.params.id).length;
@@ -139,7 +135,6 @@ app.delete('/api/budget/:id', (req, res) => {
   res.json({ ok: true });
 });
 
-// ── DÉPENSES ───────────────────────────────────────────────
 app.post('/api/fiches/:id/dep', (req, res) => {
   const data = readData();
   const count = data.depenses.filter(r => r.fiche_id === req.params.id).length;
@@ -163,7 +158,6 @@ app.delete('/api/dep/:id', (req, res) => {
   res.json({ ok: true });
 });
 
-// ── ALÉAS ──────────────────────────────────────────────────
 app.post('/api/fiches/:id/aleas', (req, res) => {
   const data = readData();
   const count = data.aleas.filter(r => r.fiche_id === req.params.id).length;
